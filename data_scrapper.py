@@ -1,19 +1,21 @@
 from urllib3 import *
-from bs4 import BeautifulSoup
+import bs4
 
 #get_links: TAKES: string as url  RETURNS: string as links
 def get_links(url):
     manager = PoolManager()
-    r=manager.request('GET', url)
+    r=manager.request( 'GET',url)
+    print(r)
     file = open("output.txt","w")
     a="done"
-    soup = BeautifulSoup(r,'lxml')
-    print(soup.find_all('a'))
+    #print(str(r.data))
+    soup = bs4.BeautifulSoup(r.data,'lxml')
     for link in soup.find_all('a'):
-        print(link.get('href'))
-        file = open("output.txt","r+")
-        file.write("hello")
-        file.write("we made it "+str(link.get("href")))
+        print(link)
+        file = open("output.txt","a")
+        #file.write("hello")
+
+        file.write(str(link.get('href'))+"\n")
     print("got here")
 #testing
-get_links("https://github.com/bulkan/robotframework-requests/issues/135")
+get_links("https://www.linode.com/docs/applications/big-data/how-to-scrape-a-website-with-beautiful-soup/")
