@@ -4,7 +4,6 @@ https://www.linode.com/linodes
 https://www.linode.com/pricing
 https://www.linode.com/addons
 https://www.linode.com/community
-#
 https://www.linode.com/docs/getting-started
 https://www.linode.com/docs/migrate-from-shared
 https://www.linode.com/docs/hosting-website
@@ -26,7 +25,6 @@ https://manager.linode.com/session/signup
 https://www.linode.com/docs/
 https://www.linode.com/docs/applications/
 https://www.linode.com/docs/applications/big-data/
-None
 https://twitter.com/share?url=https%3a%2f%2fwww.linode.com%2fdocs%2fapplications%2fbig-data%2fhow-to-scrape-a-website-with-beautiful-soup%2f&via=linode&text=How%20to%20Scrape%20a%20Website%20with%20%e2%80%a6
 http://www.facebook.com/sharer.php?u=https%3a%2f%2fwww.linode.com%2fdocs%2fapplications%2fbig-data%2fhow-to-scrape-a-website-with-beautiful-soup%2f
 https://news.ycombinator.com/submitlink?u=https%3a%2f%2fwww.linode.com%2fdocs%2fapplications%2fbig-data%2fhow-to-scrape-a-website-with-beautiful-soup%2f&t=How%20to%20Scrape%20a%20Website%20with%20Beautiful%20Soup
@@ -40,23 +38,7 @@ https://www.linode.com/community/questions/
 http://disqus.com/?ref_noscript
 http://disqus.com
 https://creativecommons.org/licenses/by-nd/4.0
-#what-is-beautiful-soup
-#install-beautiful-soup
-#install-python
-#install-beautiful-soup-and-dependencies
-#build-a-web-scraper
-#required-modules
-#add-global-variables
-#retrieve-the-webpage
-#process-the-soup-object
-#error-handling
-#cleaning-functions
-#write-data-to-an-excel-spreadsheet
-#main-routine
-#set-up-cron-to-scrape-automatically
-#retrieve-the-excel-report
 https://www.linode.com/docs/index.xml
-/docs/contribute
 https://manager.linode.com/session/signup
 https://www.linode.com/linodes
 https://www.linode.com/pricing
@@ -77,10 +59,6 @@ https://www.linode.com/press
 https://www.linode.com/referrals
 https://www.linode.com/careers
 https://www.linode.com/contact
-tel:+18554546633
-tel:+18554546633
-tel:+16093807100
-mailto:support@linode.com
 https://facebook.com/linode
 https://twitter.com/linode
 https://plus.google.com/+linode/
@@ -90,3 +68,66 @@ https://www.linode.com/tos
 https://www.linode.com/privacy
 https://www.linode.com/security
 https://www.linode.com/compliance
+Updated Monday, December 11, 2017 by Jared Kobos Contributed by Luis Cortés
+Report an Issue | View File | Edit File
+
+Beautiful Soup is a Python library that parses HTML or XML documents into a tree structure that makes it easy to find and extract data. It is often used for scraping data from websites.
+Beautiful Soup features a simple, Pythonic interface and automatic encoding conversion to make it easy to work with website data.
+Web pages are structured documents, and Beautiful Soup gives you the tools to walk through that complex structure and extract bits of that information. In this guide, you will write a Python script that will scrape Craigslist for motorcycle prices. The script will be set up to run at regular intervals using a cron job, and the resulting data will be exported to an Excel spreadsheet for trend analysis. You can easily adapt these steps to other websites or search queries by substituting different URLs and adjusting the script accordingly.
+Download and install Miniconda:
+You will be prompted several times during the installation process. Review the terms and conditions and select “yes” for each prompt.
+Restart your shell session for the changes to your PATH to take effect.
+Check your Python version:
+Update your system:
+Install the latest version of Beautiful Soup using pip:
+Install dependencies:
+The BeautifulSoup class from bs4 will handle the parsing of the web pages. The datetime module provides for the manipulation of dates. Tinydb provides an API for a NoSQL database and the urllib3 module is used for making http requests. Finally, the xlsxwriter API is used to create an excel spreadsheet.
+Open craigslist.py in a text editor and add the necessary import statements:
+After the import statements, add global variables and configuration options:
+url stores the URL of the webpage to be scraped, and total_added will be used to keep track of the total number of results added to the database. The urllib3.disable_warnings() function ignores any SSL certificate warnings.
+The make_soup function makes a GET request to the target url and converts the resulting HTML into a BeautifulSoup object:
+The urllib3 library has excellent exception handling; if make_soup throws any errors, check the urllib3 docs for detailed information.
+Beautiful Soup has different parsers available which are more or less strict about how the webpage is structured. The lxml parser is sufficient for the example script in this guide, but depending on your needs you may need to check the other options described in the official documentation.
+An object of class BeautifulSoup is organized in a tree structure. In order to access the data you are interested in, you will have to be familiar with how the data is organized in the original HTML document. Go to the initial website in a browser, right click and select View page source (or Inspect, depending on your browser) to review the structure of the data that you would like to scrape:
+Select the web page snippets by selecting just the li html tags and further narrow down the choices by selecting only those li tags that have a class of result-row. The results variable contains all the web page snippets that match this criteria:
+Attempt to create a record according to the structure of the target snippet. If the structure doesn’t match, then Python will throw an exception which will cause it to skip this record and snippet:
+Use Beautiful Soup’s array notation to access attributes of an HTML element:
+Other data attributes may be nested deeper in the HTML structure, and can be accessed using a combination of dot and array notation. For example, the date a result was posted is stored in datetime, which is a data attribute of the time element, which is a child of a p tag that is a child of result. To access this value use the following format:
+Sometimes the information needed is the tag content (in between the start and end tags). To access the tag content BeautifulSoup provides the string method:
+can be accessed with:
+The value here is further processed by using the Python strip() function, as well as a custom function clean_money that removes the dollar sign.
+Most items for sale on Craigslist include pictures of the item. The custom function clean_pic is used to assign the first picture’s URL to pic:
+Metadata can be added to the record. For example, you can add a field to track when a particular record was created:
+Use the Query object to check if a record already exists in the database before inserting it. This avoids creating duplicate records.
+Two types of errors are important to handle. These are not errors in the script, but instead are errors in the structure of the snippet that cause Beautiful Soup’s API to throw an error.
+An AttributeError will be thrown when the dot notation doesn’t find a sibling tag to the current HTML tag. For example, if a particular snippet does not have the anchor tag, then the cost key will throw an error, because it transverses and therefore requires the anchor tag.
+The other error is a KeyError. It will be thrown if a required HTML tag attribute is missing. For example, if there is no data-pid attribute in a snippet, the pid key will throw an error.
+If either of these errors occurs when parsing a result, that result will be skipped to ensure that a malformed snippet isn’t inserted into the database:
+These are two short custom functions to clean up the snippet data. The clean_money function strips any dollar signs from its input:
+The clean_pic function generates a URL for accessing the first image in each search result:
+The function extracts and cleans the id of the first image, then adds it to the base URL.
+The make_excel function takes the data in the database and writes it to an Excel spreadsheet.
+Add spreadsheet variables:
+The Headlines variable is a list of titles for the columns in the spreadsheet. The row variable tracks the current spreadsheet row.
+Use xlswriter to open a workbook and add a worksheet to receive the data.
+Prepare the worksheet:
+The first 2 items are always the same in the set_column method. That is because it is setting the attributes of a section of columns from the first indicated column to the next. The last value is the width of the column in characters.
+Write the column headers to the worksheet:
+Write the records to the database:
+Most of the fields in each row can be written using worksheet.write; worksheet.write_url is used for the listing and image URLs. This makes the resulting links clickable in the final spreadsheet.
+Close the Excel workbook:
+The main routine will iterate through every page of search results and run the soup_process function on each page. It also keeps track of the total number of database entries added in the global variable total_added, which is updated in the soup_process function and displayed once the scrape is complete. Finally, it creates a TinyDB database db.json and stores the parsed data; when the scrape is complete, the database is passed to the make_excel function to be written to a spreadsheet.
+A sample run might look like the following. Notice that each page has the index embedded in the URL. This is how Craigslist knows where the next page of data starts:
+This section will set up a cron task to run the scraping script automatically at regular intervals. The data
+Log in to your machine as a normal user:
+Make sure the complete craigslist.py script is in the home directory:
+Add a cron tab entry as the user:
+This sample entry will run the python program every day at 6:30 am.
+The python program will write the motorcycle.xlsx spreadsheet in /home/normaluser/.
+On Linux
+Use scp to copy motorcycle.xlsx from the remote machine that is running your python program to this machine:
+On Windows
+Use Firefox’s built-in sftp capabilities. Type the following URL in the address bar and it will request a password. Choose the spreadsheet from the directory listing that appears.
+Find answers, ask questions, and help others.
+This guide is published under a CC BY-ND 4.0 license.
+We're always expanding our docs. If you like to help people, can write, and have expertise in a Linux or cloud infrastructure topic, learn how you can contribute to our library.
