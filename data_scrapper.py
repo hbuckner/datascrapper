@@ -1,5 +1,6 @@
 from urllib3 import *
 import bs4
+import re
 
 #get_links: TAKES: string as url  RETURNS: string as links
 def get_links(url):
@@ -30,6 +31,15 @@ def get_text(url):
         #file.write("TEXT")
         file.write(link.text+"\n")
     print("got here")
+def get_email(url):
+    manager = PoolManager()
+    r=manager.request( 'GET',url)
+    s = str(r.data)
+    a=re.findall(r"\+\d{2}\s?0?\d{10}",s)
+    b= re.findall(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}",s)
+    print(a)
+    print(b)
 #testing
-get_links("https://www.linode.com/docs/applications/big-data/how-to-scrape-a-website-with-beautiful-soup/")
-get_text("https://www.linode.com/docs/applications/big-data/how-to-scrape-a-website-with-beautiful-soup/")
+#get_links("https://www.linode.com/docs/applications/big-data/how-to-scrape-a-website-with-beautiful-soup/")
+#get_text("https://www.linode.com/docs/applications/big-data/how-to-scrape-a-website-with-beautiful-soup/")
+get_email("https://www.quora.com/Where-can-I-get-a-free-list-of-email-addresses-in-USA")
