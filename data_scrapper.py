@@ -1,7 +1,7 @@
 from urllib3 import *
 import bs4
 import re
-
+import csv
 #get_links: TAKES: string as url  RETURNS: string as links
 def get_links(url):
     manager = PoolManager()
@@ -31,12 +31,20 @@ def get_text(url):
         #file.write("TEXT")
         file.write(link.text+"\n")
     print("got here")
+#outputs emails to csv file
 def get_email(url):
     manager = PoolManager()
     r=manager.request( 'GET',url)
     s = str(r.data)
+    fieldnames=["emails"]
     a=re.findall(r"\+\d{2}\s?0?\d{10}",s)
-    b= re.findall(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}",s)
+    b=re.findall(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}",s)
+    file = open("output.csv","w")
+    with file:
+        writer =csv.DictWriter(file,fieldnames=fieldnames)
+        writer.writeheader()
+        for x in b:
+            writer.writerows([{'emails':x}])
     print(a)
     print(b)
 #testing
